@@ -24,22 +24,25 @@ To support this project and all future automated deployments, a secure AWS sandb
 ### Security Layout
 ```mermaid
 graph TD
-    subgraph Local M4 Mac Workspace
+    subgraph Local[Local M4 Mac Workspace]
         Terminal[Mac Terminal] -->|1. Invokes Profile| CLIProfile[Named CLI Profile: sandbox-admin]
         CLIProfile -->|2. Reads Local Config| SecretStore[~/.aws/credentials File]
         SecretStore -->|3. Secured Via| FileLock[chmod 600 Permission Mask]
     end
 
-    subgraph AWS Cloud Account (UK Region: eu-west-2)
-        CLIProfile -->|4. Authenticates API Calls| IAMAdmin[Dedicated IAM Admin User]
-        IAMAdmin -->|5. Manages Tasks| AWSResources[AWS Cloud Infrastructure]
+    subgraph AWS[AWS Cloud Account UK Region: eu-west-2]
+        IAMAdmin[Dedicated IAM Admin User] -->|5. Manages Tasks| AWSResources[AWS Cloud Infrastructure]
         
         subgraph CostControls[Cost Controls]
             Budget[AWS Budgets] -->|6. Monitors Spending| Threshold{Exceeds \$5.00 daily?}
             Threshold -->|Yes| Email[Automated Personal Email Alert]
         end
     end
+
+    %% Clean cross-subgraph connection
+    CLIProfile -->|4. Authenticates API Calls| IAMAdmin
 ```
+
 
 ### Security & Governance Guardrails Implemented
 
