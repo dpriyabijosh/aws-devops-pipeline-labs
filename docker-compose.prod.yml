@@ -1,0 +1,33 @@
+version: '3.8'
+
+networks:
+  log_analytics_tier:
+    driver: bridge
+    name: log_analytics_prod_network
+
+services:
+  log-parser:
+    image: dbijosh/log-parser:v1
+    container_name: enterprise-log-parser-engine
+    restart: on-failure:3
+    
+    # Enterprise Hardening & Security Profiles
+    user: "1000:1000"      # Runs as non-root to block container breakout exploits
+    security_opt:
+      - no-new-privileges:true
+
+    # Resource Guardrails (Prevents buggy logs from crash-locking the cloud host)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'     # Strict cap at 50% of 1 CPU core
+          memory: 128M     # Hard memory ceiling
+    
+    networks:
+      - log_analytics_tier
+    
+    volumes:
+      - type: bind
+        source: ./server.log
+        target: /app/server.log
+        read_only: true    # Enforces read-only isolation so logs cannot be tampered with
